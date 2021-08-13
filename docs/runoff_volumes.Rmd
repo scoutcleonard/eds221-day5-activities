@@ -1,0 +1,36 @@
+---
+title: "Runoff Volumes"
+author: "Scout Leonard"
+date: "8/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(here)
+
+```
+
+```{r}
+impervious_vector <- seq(from = 0.6, to = 0.8, by = 0.01)
+predict_runoff_1 <- predict_runoff(impervious_vector, 182)
+
+runoff_df <- data.frame(impervious_vector, predict_runoff_1)
+```
+
+```{r}
+ggplot(data = runoff_df, aes(x = impervious_vector, y = predict_runoff_1)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Water Runoff Predictions",
+       x = "Range of Impervious Fractions from 0.6 to 0.8",
+       y = "Water Runoff Volume (cubic feet)")
+  
+```
+
+```{r}
+ggsave(here::here("figs", "runoff_predictions.png"))
+```
+

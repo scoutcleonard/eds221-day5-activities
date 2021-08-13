@@ -1,0 +1,75 @@
+---
+title: "US Tilapia Imports"
+author: "Scout Leonard"
+date: "8/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(here)
+library(janitor)
+library(skimr)
+
+
+source(here::here("src", "storm_runoff.R"))
+
+us_tilapia_imports <- read_csv(here::here("data", "us_tilapia_imports.csv"))
+
+```
+
+## Explore the Data
+
+```{r}
+summary(us_tilapia_imports)
+
+names(us_tilapia_imports)
+
+dim(us_tilapia_imports)
+
+skim(us_tilapia_imports)
+```
+
+```{r}
+pivot_us_tilapia_imports <- pivot_longer(data = us_tilapia_imports, cols = -country, names_to = "year", values_to = "Amount")
+```
+
+```{r}
+class(pivot_us_tilapia_imports$year)
+
+pivot_us_tilapia_imports <- pivot_us_tilapia_imports %>% 
+  mutate(year = as.numeric(year))
+
+class(pivot_us_tilapia_imports$year)
+```
+
+```{r}
+yearly_tilapia_tot <- pivot_us_tilapia_imports %>% 
+  group_by(year) %>% 
+  summarize(total_catch = sum(Amount, na.rm = TRUE))
+
+ggplot(data = yearly_tilapia_tot, aes(x = year, y = total_catch)) +
+  geom_line() +
+  labs(title = "Yearly Tilapia Imports to the US",
+       x = "Year",
+       y = "Total Import")
+```
+```{r}
+ggsave(here::here("figs", "yearly_tilapia_imports.png"))
+```
+
+```{r}
+import_country_subset <- pivot_us_tilapia_imports %>% 
+  filter(country == "Ecuador" | country == "Honduras" | country == "Costa Rica" | country == "Mexico")
+
+ggplot(data = import_country_subset, aes(x = year, y = Amount)) +
+  geom_line(aes(color = country)) +
+  labs(title = "US Tilapia Imports by Country",
+       x = "Year",
+       y = "Total Imports")
+
+ggsave(here::here("figs", "import_country_tilapia.jpg"))
+```
+
